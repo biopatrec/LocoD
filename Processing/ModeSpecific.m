@@ -108,7 +108,7 @@ if ValidationMethode=="10Fold"
             errordlg(e.message);
             return;
         end
-        PlotDataFeaturespace(data_3,lable_3);
+        
         testLabelsPredicted_3 = kfoldPredict(classifierModel_3);
         [C,order] =confusionmat(lable_3,testLabelsPredicted_3');
         figure
@@ -134,7 +134,7 @@ if ValidationMethode=="10Fold"
             errordlg(e.message);
             return;
         end
-        PlotDataFeaturespace(data_4,lable_4);
+       
         testLabelsPredicted_4 = kfoldPredict(classifierModel_4);
         [C,order] =confusionmat(lable_4,testLabelsPredicted_4');
         figure
@@ -160,7 +160,7 @@ if ValidationMethode=="10Fold"
             errordlg(e.message);
             return;
         end
-        PlotDataFeaturespace(data_5,lable_5);
+        
         testLabelsPredicted_5 = kfoldPredict(classifierModel_5);
         [C,order] =confusionmat(lable_5,testLabelsPredicted_5');
         figure
@@ -184,7 +184,7 @@ if ValidationMethode=="10Fold"
             errordlg(e.message);
             return;
         end
-        PlotDataFeaturespace(data_6,lable_6);
+        
         testLabelsPredicted_6 = kfoldPredict(classifierModel_6);
         [C,order] =confusionmat(lable_6,testLabelsPredicted_6');
         figure
@@ -208,7 +208,7 @@ if ValidationMethode=="10Fold"
             errordlg(e.message);
             return;
         end
-        PlotDataFeaturespace(data_7,lable_7);
+        
         testLabelsPredicted_7 = kfoldPredict(classifierModel_7);
         [C,order] = confusionmat(lable_7,testLabelsPredicted_7');
         figure
@@ -233,7 +233,7 @@ if ValidationMethode=="10Fold"
             errordlg(e.message);
             return;
         end
-        PlotDataFeaturespace(data_8,lable_8);
+        
         testLabelsPredicted_8 = kfoldPredict(classifierModel_8);
         [C,order] = confusionmat(lable_8,testLabelsPredicted_8');
         figure
