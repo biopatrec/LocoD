@@ -65,7 +65,7 @@ classdef RecordingSession < handle
         prerecSignal Signal = Signal.empty;
         prerecCurrentTime = 0;
         prerecPlaybackSpeedRatio = 0; % For future use
-        prerecGui GUI_ReplayTool;
+        
         prerecImportTrueTags logical = true;
         prerecTrueTagPtr = -1;
     end
@@ -336,27 +336,7 @@ classdef RecordingSession < handle
                 this.dummyCurrentTime = 0;
                 this.dummyLastSample = 0;
 
-            elseif strcmp(deviceName_EMG, 'prerecorded')
-                % Handle prerecorded
-                gprlog('Starting recording using a prerecorded signal as source...');
-                this.prerecCurrentTime = 0;
-                this.prerecPlaybackSpeedRatio = 1;
-                this.prerecTrueTagPtr = -1;
-                % Don't change prerecImportTrueTags
-
-                % !@! NOTE: We prerecorded, we start at Paused state.
-                this.RecordingStat = 0;
-
-                % Open the helper GUI
-                try
-                    if ~isempty(this.prerecGui)
-                        % Hmm. Weird
-                        this.prerecGui.InvalidateAndExit();
-                    end
-                    this.prerecGui = GUI_ReplayTool(this);
-                catch Ex
-                    warning(['Error while creating playback GUI: ' Ex.message])
-                end
+            
 
             elseif strcmp(deviceName_EMG, 'DELSYS_Trigno')
                 % Handle DELSYS
@@ -447,181 +427,6 @@ classdef RecordingSession < handle
                         this.signal.AppendSignal(nNewDummySample, sig);
                     end
 
-                elseif strcmp(this.recProps.Device, 'prerecorded')
-                    sampleRate = this.recProps.SamplingFreq;
-                    %~~nChTotal = this.recProps.UnmaskedNumAllCh;
-                    sourceLen = this.prerecSignal.GetNumSample();
-
-                    % It is good to know amount of time that prerecorded
-                    % signal and new signal differ.
-                    prerecToNewSigTimeDiff = this.signal.GetTime() - this.prerecCurrentTime;
-
-                    % Get previous sample index
-                    sampleIndex0 = 1 + floor(this.prerecCurrentTime * sampleRate);
-
-                    if sampleIndex0 > sourceLen
-                        % Already past end of signel
-                        % Pause
-                        if this.RecordingStat ~= 0
-                            warning("prerecorded: Going past end of signal. Pausing.")
-                            this.RecordingStat = 0;
-                        end
-                    end
-
-                    if this.RecordingStat==0
-                        % Don't go any further already here.
-                        % Compare with other real input devices such
-                        %   as Delsys, where the data should be ingressed
-                        %   whether or not RecordingStat==1.
-
-                        % However, do update the GUI.
-                        try
-                            this.prerecGui.UpdateReplayTool();
-                        catch Ex
-                            gprlog(['* Error while updating playback GUI: ' Ex.message])
-                        end
-                        return
-                    end
-
-                    % Advance the time
-                    if deltaTime > 0.3
-                        disp('Very high dt! Slow...')
-                    end
-                    this.prerecCurrentTime = this.prerecCurrentTime + deltaTime * this.prerecPlaybackSpeedRatio;
-
-                    % Get (last + 1) sample of block
-                    sampleIndex1 = 1 + floor(this.prerecCurrentTime * sampleRate);
-                    if sampleIndex1 <= sampleIndex0
-                        % No progression >B)
-                        return
-                    end
-
-                    % Remember:
-                    %   sampleIndex0 is first block sample
-                    %   sampleIndex1 is (last + 1) block sample
-
-                    % Going past the end of the source?
-                    % Trim
-                    if sampleIndex1 > sourceLen + 1
-                        sampleIndex1 = sourceLen + 1;
-                    end
-                    if sampleIndex0 > sourceLen
-                        sampleIndex0 = sourceLen;
-                    end
-                    blockLen = sampleIndex1 - sampleIndex0;
-                    blockSourceSamples = sampleIndex0:(sampleIndex1 - 1);
-
-                    % Take samples from source signal
-                    % TODO: Move stuff here to
-                    %   IncomingDataTransposition_Prerecorded()
-                    origin = this.prerecSignal;
-                    rp = this.recProps;
-                    block = [...
-                        origin.signal(rp.ChannelSelectionEMG, blockSourceSamples); ...
-                        origin.signal(rp.ChannelSelectionPS , blockSourceSamples);
-                        origin.signal(rp.ChannelSelectionIMU, blockSourceSamples)];
-
-                    if ~isempty(rp.ChannelSelectionPS)
-                        % Now note that the PS channel in the source signal is
-                        %   usually pre-processed already and is not in the raw
-                        %   shape. Take the raw PS channel instead, by doing a
-                        %   simple replacement.
-                        PSChannelRow = rp.UnmaskedIdxPS(1);
-                        block(PSChannelRow, :) = origin.originalPressureSignal(1, blockSourceSamples);
-                    end
-
-                    %%~~% Append zeros if needed
-                    %%~~block = [block, zeros(nChTotal, blockZeroLen)];
-
-                    % Update the helper GUI
-                    try
-                        this.prerecGui.UpdateReplayTool();
-                    catch Ex
-                        gprlog(['* Error while updating playback GUI: ' Ex.message])
-                    end
-
-                    % Add ground truth tags that exist in range of
-                    %  [sampleIndex0, sampleIndex1)
-                    numTrueTags = origin.GetNumTags();
-                    if this.prerecImportTrueTags && numTrueTags > 0
-                        % Data in this.prerecSignal.tags is not a value-vector of
-                        %  tag values over time, but is a list of
-                        %  (tagValue,occuranceTime) of tags. Therefore it
-                        %  is not trivial to find tags in range of
-                        %  sampleIndex0~sampleIndex1 in there.
-                        % We use a forward-looking linear search that keeps
-                        %  track of index of the last imported tag.
-
-                        % Check if prerecTrueTagPtr still seems valid.
-                        tagPtrValid = false;
-                        if this.prerecTrueTagPtr > 0 && this.prerecTrueTagPtr <= numTrueTags
-                            tagPtrSamp = sampleRate * origin.tags(2, this.prerecTrueTagPtr);
-
-                            if tagPtrSamp > sampleIndex0
-                                % Last imported true-tag is in future of
-                                % the signal. We assume we have lost track
-                                % of the tag-pointer.
-                                gprlog('prerecTrueTagPtr is invalidated. Searching again.');
-                                tagPtrValid = false;
-                            else
-                                % Last imported true-tag is in the past. We
-                                % can traverse forward until we get to
-                                % present time (prerecCurrentTime).
-                                tagPtrValid = true;
-                            end
-                        elseif this.prerecTrueTagPtr == 0
-                            % We should be about the beginning of data.
-                            tagPtrValid = true;
-                        end
-
-                        if ~tagPtrValid
-                            % TagPtr is invalid.
-                            % Now we have to find a tag immediately before
-                            % sampleIndex0.
-                            for TP = 0:numTrueTags
-                                this.prerecTrueTagPtr = TP;
-                                if this.prerecTrueTagPtr >= numTrueTags
-                                    % No hit. sampleIndex0 is after the
-                                    % last tag we have. Oh well.
-                                    break
-                                end
-
-                                nextTagSamp = origin.tags(2, TP+1) * sampleRate;
-                                if nextTagSamp >= sampleIndex0
-                                    % Take TP as the tag immediately
-                                    %   before sampleIndex0.
-                                    break
-                                end
-                            end
-                        end
-
-                        % Start from prerecTrueTagPtr+1 and add tags.
-                        %   that fall before sampleIndex1.
-                        TP = this.prerecTrueTagPtr;
-                        while TP < numTrueTags
-                            nextTagInfo = origin.tags(:, TP+1);
-                            nextTagSamp = nextTagInfo(2) * sampleRate;
-                            if nextTagSamp >= sampleIndex1
-                                % Don't go further now.
-                                break
-                            end
-
-                            % Now it is vital to remember that the tag
-                            % occurence time should be shifted to be in
-                            % relation to the new signal not the
-                            % prerecorded one.
-                            actualTagTime = nextTagInfo(2) + prerecToNewSigTimeDiff;
-                            tagValue = nextTagInfo(1);
-                            this.signal.AddGroundTruthTags(tagValue, actualTagTime);
-
-                            % Step forward
-                            TP = TP + 1;
-                        end
-                        this.prerecTrueTagPtr = TP;
-                    end
-
-                    % Register
-                    this.signal.AppendSignal(blockLen, block);
 
                 elseif strcmp(this.recProps.Device, 'DELSYS_Trigno')
                     % === Handle DELSYS === %
@@ -713,15 +518,7 @@ classdef RecordingSession < handle
                 % !@! WASBUGGY: Must not clear prerecSignal yet.
             end
 
-            % Delete helper GUI for prerecorded
-            if ~isempty(this.prerecGui)
-                try
-                    this.prerecGui.InvalidateAndExit();
-                catch Ex
-                    warning(['Error while deleting playback GUI: ' Ex.message])
-                end
-                this.prerecGui = GUI_ReplayTool.empty();
-            end
+ 
 
             % Cleanup Streams manager
             this.streams = MultiStreamSourcedSignal.empty;
