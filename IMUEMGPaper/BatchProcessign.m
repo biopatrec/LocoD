@@ -15,19 +15,25 @@ locoDDir = fileparts(which('LocoD.m'));
 
 for i=1:length(filename)
 
+	%Load File
+
     processing.originalRecProps=[];
-    fullpath = fullfile(path, filename{i});
+    fullpath = fullfile(path, filename{i});  
     loadedSig=load(fullpath);
     loadedSig.signalCopy.filename=filename{i};
     loadedSig = loadedSig.signalCopy;
     sigData=loadedSig;
-
-    recProps=sigData.recProps;
+	recProps=sigData.recProps;
     recProps.ChannelMaskUnset();
     processing.originalRecProps = recProps;
+	
+	% Do the Classification
     Result{i}=ReadyforClassification(processing,sigData,1,1);
 
 end
+
+%Get mean of classification accuracy for all classes, classes in steady state, classesin transition, seperate calsses ( w=walkinf, sa=stair ascent, sd=stair descent, ra= ramp ascent, rd= ramp descent, wsa= waling to ramp ascent and ...)
+% What we use is ss and tr which is the mean of of classes in steady state and transition for each participant
 [AllClass,SSClass,TrClass,wclass,wsaclass,wsdclass,wraclass,wrdclass,saclass,sdclass,rdclass,raclass,sawclass,sdwclass,rawclass,rdwclass,w,sa,sd,ra,rd,wsa,wrd,wsd,wra,raw,rdw,sdw,saw,ss,tr]=Calculatemean(Result);
 Allmean=[3,w; 6,sa; 7,sd; 4,ra; 5,rd; 36, wsa; 37,wsd;34,wra;35,wrd;63,saw;73,sdw;43,raw;53,rdw];
 meanofss=mean([w,sa,sd,ra,rd]);
@@ -37,18 +43,16 @@ meanoftr=mean([wsa,wrd,wra,saw,sdw,raw,rdw]);
 %% Process for only IMU
 
 for i=1:length(filename)
-
+	%Load File
     processing.originalRecProps=[];
     fullpath = fullfile(path, filename{i});
     loadedSig=load(fullpath);
     loadedSig.signalCopy.filename=filename{i};
     loadedSig = loadedSig.signalCopy;
     sigData=loadedSig;
-
-    recProps=sigData.recProps;
-%     recProps.ChannelMaskInclusion(recProps.UnmaskedIdxIMU(1:6), 0);
+	recProps=sigData.recProps;
     processing.originalRecProps = recProps;
-    %%Treat Signal
+	% Do the Classification
     ResultIMU{i}=ReadyforClassification(processing,sigData,0,1);
 
 end
@@ -63,14 +67,14 @@ meanoftrIMU=mean([wsa_IMU,wrd_IMU,wra_IMU,saw_IMU,sdw_IMU,raw_IMU,rdw_IMU]);
 
 %% Process only EMG
 for i=1:length(filename)
-
+	%Load File
     processing.originalRecProps=[];
     fullpath = fullfile(path, filename{i});
     loadedSig=load(fullpath);
     loadedSig.signalCopy.filename=filename{i};
     loadedSig = loadedSig.signalCopy;
     sigData=loadedSig;
-
+	% Do the Classification
     recProps=sigData.recProps;
     processing.originalRecProps = recProps;
     %%Treat Signal

@@ -74,8 +74,8 @@ else
     ST_CC_4ClassLabels=[];
     ST_CC_4=[];
 end
-sum_ST5=sum(processing.ST_CC_5.NormalizedValues,2);  %sum_ST5(sum_ST5<10)=0;
-sum_ST7=sum(processing.ST_CC_7.NormalizedValues,2);  %sum_ST7(sum_ST7<10)=0;
+sum_ST5=sum(processing.ST_CC_5.NormalizedValues,2); 
+sum_ST7=sum(processing.ST_CC_7.NormalizedValues,2);  
 
 %Remove vertically and horizontally the classes that are less than 10
 sw3=sum(processing.SW_CC_3.NormalizedValues,2);
@@ -109,7 +109,7 @@ else
     SW_CC_4=[];
 end
 
-sum_SW6=sum(processing.SW_CC_6.NormalizedValues,2);  %sum_SW6(sum_SW6<10)=0;
+sum_SW6=sum(processing.SW_CC_6.NormalizedValues,2);  
 
 
 ST_CC_5=diag(processing.ST_CC_5.NormalizedValues)./sum_ST5;

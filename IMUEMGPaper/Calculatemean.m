@@ -3,6 +3,8 @@ wclass=[];wsaclass=[];wsdclass=[];wraclass=[];wrdclass=[];saclass=[];sdclass=[];
 sawclass=[];sdwclass=[];rawclass=[];rdwclass=[];
 %Calculate mean
 
+
+%Find each class's accuracy
 for k=1:length(Result)
     res=Result{k};
     %Walking
@@ -76,6 +78,7 @@ for k=1:length(Result)
 
 end
 
+%Calculate mean without nan
 w=mean(wclass, 'all','omitnan' );
 sa=mean(saclass, 'all','omitnan' );
 sd=mean(sdclass, 'all' ,'omitnan');
