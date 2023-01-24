@@ -255,7 +255,7 @@ classdef RecordingSession < handle
 
                     if this.hasStreamAux
                         % Open the connection to data port for IMU
-                        this.objreadfromAUX = tcpclient('localhost',50044);
+                        this.objreadfromAUX = tcpclient('localhost', 4);
                         this.objreadfromAUX.ByteOrder = "little-endian";
                         %this.objreadfromAUX.InputBufferSize = 64000000;
                         flush(this.objreadfromAUX)
