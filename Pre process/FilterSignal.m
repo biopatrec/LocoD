@@ -36,7 +36,7 @@ if filtertype=="Notch 50 HZ"
 
     [sos_var,g] = zp2sos(z, p, k);
     Hd50        = dfilt.df2sos(sos_var, g);
-    FilteredSignal(chidx,:) = filter(Hd50,data(chidx,:));
+    FilteredSignal(chidx,:) = filter(Hd50,data(chidx,:),2);
 elseif filtertype=="20- 500 HZ"
     % Bandpass filter
     N   = 4;     % Order
@@ -48,7 +48,7 @@ elseif filtertype=="20- 500 HZ"
 
     [sos_var,g] = zp2sos(z, p, k);
     Hd          = dfilt.df2sos(sos_var, g);
-    FilteredSignal(chidx,:) = filter(Hd,data(chidx,:));
+    FilteredSignal(chidx,:) = filter(Hd,data(chidx,:),2);
 elseif filtertype=="None"
     FilteredSignal=data;
 elseif filtertype =="0- 50 HZ"
@@ -62,7 +62,7 @@ elseif filtertype =="0- 50 HZ"
 
     [sos_var,g] = zp2sos(z, p, k);
     Hd          = dfilt.df2sos(sos_var, g);
-    FilteredSignal(chidx,:) = filter(Hd,data(chidx,:));
+    FilteredSignal(chidx,:) = filter(Hd,data(chidx,:),2);
 
 else
     gprlog("*Invalid filtertype")
