@@ -1,27 +1,4 @@
-% ---------------------------- Copyright Notice ---------------------------
-% This file is part of LocoD © which is open and free software under
-% the GNU Lesser General Public License (LGPL). See the file "LICENSE" for
-% the full license governing this code and copyrights.
-%
-% LocoD was initially developed by Bahareh Ahkami at
-% Center for Bionics and Pain research and Chalmers University of Technology.
-% All authors’ contributions must be kept
-% acknowledged below in the section "Updates % Contributors".
-%
-% Would you like to contribute to science and sum efforts to improve
-% amputees’ quality of life? Join this project! or, send your comments to:
-% ahkami@chalmers.se.
-%
-% The entire copyright notice must be kept in this or any source file
-% linked to LocoD. This will ensure communication with all authors and
-% acknowledge contributions here and in the project web page (optional).
-
-% acknowledge contributions here and in the project web page (optional).
-% ------------------- Function Description ------------------
-%Get signal feature based on Feature ID.
-% This part was inpired by BioPatRec
-% --------------------------Updates--------------------------
-% 2022-03-15 / Bahareh Ahkami / Creation
+%Get signal feature based on Feature ID. Originally part of BioPatRec
 
 function xFeatures = GetSigFeatures(data,sF, fID)
 
@@ -173,8 +150,9 @@ function pF = GetSigFeatures_tpks(pF)
     end        
 
     for i = 1 : pF.ch
-        pF.f.tpks(i) = size(pF.pks{i},2);        
+        pF.f.tpks(i) = size(pF.pks{i},2)';        
     end
+    pF.f.tpks=pF.f.tpks';
 end
 
 % -----------------------------------------------
@@ -197,6 +175,7 @@ function pF = GetSigFeatures_tmpks(pF)
     for i = 1 : pF.ch
         pF.f.tmpks(i) = mean(pF.pks{i});        
     end
+    pF.f.tmpks=pF.f.tmpks';
 end
 
 % -----------------------------------------------
@@ -217,7 +196,7 @@ function pF = GetSigFeatures_tmvel(pF)
     end        
     if ~isfield(pF,'pksData')
         for i = 1 : pF.ch
-            pF.pksData{i} = pF.data(pF.locs{1}, i);          % Only data from the peaks
+            pF.pksData{i} = pF.data(i,pF.locs{1});          % Only data from the peaks
             pF.diffPksData{i} = diff(pF.pksData{i});           % Get the diff of the peaks or velocity of the peaks
         end
     end    
@@ -304,6 +283,38 @@ end
 
 % -----------------------------------------------
 
+function pF = GetSigFeatures_tcr(pF)
+% 2011-07-27 Max Ortiz / Creation
+    % Correlation
+    % Close to 1 means mutual increment
+    % Close to -1 means mutual decrement
+    % Close to 0 is no correlation or no-linear correlation
+    mcr = corrcoef(pF.data);
+    k=1;
+    for i = 1: pF.ch
+        for j = i+1 : pF.ch
+            pF.f.tcr(k) = mcr(j,i);
+            k=k+1;
+        end
+    end
+end
+
+% -----------------------------------------------
+
+function pF = GetSigFeatures_tcv(pF)
+% 2011-07-27 Max Ortiz / Creation
+    % Covariance
+    % Note: It is possible that the covariance is not required because corr is
+    % computer already
+    mcr = cov(pF.data);
+    k=1;
+    for i = 1: pF.ch
+        for j = i+1 : pF.ch
+            pF.f.tcv(k) = mcr(j,i);
+            k=k+1;
+        end
+    end
+end
 
 % ######################### Frequency Features ###################
 
@@ -415,7 +426,15 @@ end
 
 % -----------------------------------------------
 
+function pF = GetSigFeatures_tdam(pF)
+% 2012-05-22 Max Ortiz / Creation, found in FP10
 
+    temp = zeros(size(pF.data));
+    temp(:,1:end-1) = pF.data(:,2:end); % Compute k+1
+    diffAmp = abs(temp - pF.data);      % compute the absulute difference
+    pF.f.tdam = sum(diffAmp(:,1:end-1),2) ./ (pF.sp-1); 
+
+end
 
 function pF = GetSigFeatures_tfd(pF)
 % 2012-06-06 Max Ortiz / Creation, found in GS97
@@ -456,5 +475,17 @@ function pF = GetSigFeatures_tmfl(pF)
 
 end
 
+function pF = GetSigFeatures_tfdh(pF)
+% 2012-06-06 Max Ortiz / Creation, found in AK10
+% Fractal dimension using Higuchi algorithm
 
+    if ~isfield(pF.f,'tmfl')
+        pF = GetSigFeatures_tmfl(pF);
+    end
+    
+    dX = log(pF.L(:,1))-log(pF.L(:,10));
+    dY = log(10)-log(1);
+    pF.f.tfdh = dX./dY;
+    
+end
 

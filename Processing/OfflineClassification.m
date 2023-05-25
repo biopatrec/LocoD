@@ -1,29 +1,4 @@
-% ---------------------------- Copyright Notice ---------------------------
-% This file is part of LocoD © which is open and free software under
-% the GNU Lesser General Public License (LGPL). See the file "LICENSE" for
-% the full license governing this code and copyrights.
-%
-% LocoD was initially developed by Bahareh Ahkami at
-% Center for Bionics and Pain research and Chalmers University of Technology.
-% All authors’ contributions must be kept
-% acknowledged below in the section "Updates % Contributors".
-%
-% Would you like to contribute to science and sum efforts to improve
-% amputees’ quality of life? Join this project! or, send your comments to:
-% ahkami@chalmers.se.
-%
-% The entire copyright notice must be kept in this or any source file
-% linked to LocoD. This will ensure communication with all authors and
-% acknowledge contributions here and in the project web page (optional).
-
-% acknowledge contributions here and in the project web page (optional).
-% ------------------- Function Description ------------------
-% Offline classification codes, diffent algorithms can be added
-%
-% --------------------------Updates--------------------------
-% 2022-03-15 / Bahareh Ahkami / Creation
-
-
+%Offline classification codes, diffent algorithms can be added
 function  [testLabelsPredicted,classifierModel,CC_3,CC_4,CC_5,CC_6,CC_7,CC_8,CC_9]=OfflineClassification(data,Lables,Prevlabel,ClassificationMethod,ClassificationType,Testpercentage,trainpercentage, validationpercentage,Architecture,ValidationMethode)
 dType=ClassificationType;
 
@@ -73,9 +48,9 @@ elseif ClassificationMethod=="LDA"  && (Architecture=="Binary" || Architecture==
 elseif ClassificationMethod=="SVM" &&  (Architecture=="Binary" || Architecture=="All data-Phase dependant")  && ValidationMethode=="10Fold"
 
     try
-        SVMModel = fitcecoc(data, Lables,'KFold',10);
-        
-       
+        SVMModel = fitcecoc(data, Lables);
+        classifierModel = crossval(SVMModel);
+        fitcsvm
 
     catch e
         disp(e)
@@ -84,12 +59,7 @@ elseif ClassificationMethod=="SVM" &&  (Architecture=="Binary" || Architecture==
         coeff = [];
         return;
     end
-    testLabelsPredicted = kfoldPredict(SVMModel);
-
-
-elseif ClassificationMethod=="SVM" &&  (Architecture=="Binary" || Architecture=="All data-Phase dependant")  && ValidationMethode==" "
-
-disp("NOT IMPLEMENTED YET");
+    testLabelsPredicted = kfoldPredict(classifierModel);
 
 
 elseif ClassificationMethod=="LDA" || ClassificationMethod=="SVM"  && (Architecture=="Mode-Specific" || Architecture~="Mode-Specific-PhaseDependant")% && ValidationMethode=="LOOCV" || ValidationMethode=="RondValidation"
@@ -108,7 +78,7 @@ if Architecture ~= "Mode-Specific" && Architecture~="Mode-Specific-PhaseDependan
     %plotconfusion(testlabels,testLabelsPredicted');
     [C,order] = confusionmat(Lables,testLabelsPredicted');
 
-    CC=confusionchart(C,order);
+    CC_3=confusionchart(C,order);
     CC.RowSummary = 'row-normalized';
     CC.ColumnSummary = 'column-normalized';
     for i=1:length(CC.ClassLabels)

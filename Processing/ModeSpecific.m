@@ -1,31 +1,4 @@
-% ---------------------------- Copyright Notice ---------------------------
-% This file is part of LocoD © which is open and free software under
-% the GNU Lesser General Public License (LGPL). See the file "LICENSE" for
-% the full license governing this code and copyrights.
-%
-% LocoD was initially developed by Bahareh Ahkami at
-% Center for Bionics and Pain research and Chalmers University of Technology.
-% All authors’ contributions must be kept
-% acknowledged below in the section "Updates % Contributors".
-%
-% Would you like to contribute to science and sum efforts to improve
-% amputees’ quality of life? Join this project! or, send your comments to:
-% ahkami@chalmers.se.
-%
-% The entire copyright notice must be kept in this or any source file
-% linked to LocoD. This will ensure communication with all authors and
-% acknowledge contributions here and in the project web page (optional).
-
-% acknowledge contributions here and in the project web page (optional).
-% ------------------- Function Description ------------------
-% Mode specific processing with 10-fold validation and with no validation
-% Other tyoes of classification and validation for Mode-s[ecific
-% archtecture can be added to this file.
-%
-% --------------------------Updates--------------------------
-% 2022-03-15 / Bahareh Ahkami / Creation
-
-
+%Mode specific processing
 
 function [testLabelsPredicted,classifierModel,CC_3,CC_4,CC_5,CC_6,CC_7,CC_8,CC_9]= ModeSpecific(data,Lables,Prevlabel, ValidationMethode,dType,Testpercentage,trainpercentage, validationpercentage,ClassificationMethod)
 tg_3=1; tg_4=1; tg_5=1; tg_6=1; tg_7=1; tg_8=1; tg_9=1;
@@ -42,38 +15,29 @@ for i=1:length(Prevlabel)
         % 3 (walking) can have transition to all the movments so if the
         % one before is 3 it can be 3 or 34 or 35 or 36 or 36 or 38 or
         % 39
-        %  classifier with these data in it
+        % I have to make classifier with these data in it
         lable_3(tg_3) = Lables(i);
         data_3(tg_3,:) = data(i,:);
         tg_3=tg_3+1;
 
     elseif (Prevlabel(i)==4  ||   floor(Prevlabel(i) /10)==4)  && (Lables(i) == 4 || Lables(i) == 43 || Lables(i) == 48)
-         %If Previouse label was 4 current lable should be 4 or a
-         %transition from 4 to 3
-         
         lable_4(tg_4) = Lables(i);
         data_4(tg_4,:) = data(i,:);
         tg_4=tg_4+1;
- 
+        %This is a bit tricky how to categorize transition
+
     elseif (Prevlabel(i)==5  ||   floor(Prevlabel(i) /10)==5) && (Lables(i) == 5 || Lables(i) == 53 || Lables(i) == 58)
-         %If Previouse label was 5 current lable should be 5 or a
-         %transition from 5 to 3
         lable_5(tg_5) = Lables(i);
         data_5(tg_5,:) = data(i,:);
         tg_5=tg_5+1;
 
 
     elseif (Prevlabel(i)==6  ||   floor(Prevlabel(i) /10)==6)  && (Lables(i) == 6 || Lables(i) == 63 || Lables(i) == 68)
-         %If Previouse label was 6 current lable should be 6 or a
-         %transition from 6 to 3
         lable_6(tg_6) = Lables(i);
         data_6(tg_6,:) = data(i,:);
         tg_6=tg_6+1;
 
     elseif (Prevlabel(i)==7  ||   floor(Prevlabel(i) /10)==7)  && (Lables(i) == 7 || Lables(i) == 73 || Lables(i) == 78)
-         %If Previouse label was 7 current lable should be  7or a
-         %transition from 7 to 3
-        
         lable_7(tg_7) = Lables(i);
         data_7(tg_7,:) = data(i,:);
         tg_7=tg_7+1;
@@ -94,7 +58,7 @@ end
 if ValidationMethode=="10Fold"
     if ~isempty(lable_3)
         try
-            %classifier for class 3 (Walking)
+            %classifierModel = fitcdiscr(data_3, lable_3,'Leaveout','on', 'DiscrimType', dType);
             if ClassificationMethod=="LDA"
                 classifierModel_3 = fitcdiscr(data_3, lable_3,'KFold',10, 'DiscrimType', dType);
             elseif ClassificationMethod=="SVM"
@@ -108,7 +72,7 @@ if ValidationMethode=="10Fold"
             errordlg(e.message);
             return;
         end
-        
+        PlotDataFeaturespace(data_3,lable_3);
         testLabelsPredicted_3 = kfoldPredict(classifierModel_3);
         [C,order] =confusionmat(lable_3,testLabelsPredicted_3');
         figure
@@ -118,23 +82,23 @@ if ValidationMethode=="10Fold"
         CC_3.Title = "Walking";
 
     end
-     %classifier for class 4
     if ~isempty(lable_4)
         try
-
+            % classifierModel_4 = fitcdiscr(data_4, lable_4,'Leaveout','on', 'DiscrimType', dType);
+           % classifierModel_4 = fitcdiscr(data_4, lable_4,'KFold',10, 'DiscrimType', dType);
             if ClassificationMethod=="LDA"
                 classifierModel_4 = fitcdiscr(data_4, lable_4,'KFold',10, 'DiscrimType', dType);
                
             elseif ClassificationMethod=="SVM"
                 classifierModel_4= fitcecoc(data_4, lable_4,'KFold',10);
             end
-            classifierModel{2}=classifierModel_4; %Save Classifier in a cell
+            classifierModel{2}=classifierModel_4;
         catch e
             disp(e)
             errordlg(e.message);
             return;
         end
-       
+        PlotDataFeaturespace(data_4,lable_4);
         testLabelsPredicted_4 = kfoldPredict(classifierModel_4);
         [C,order] =confusionmat(lable_4,testLabelsPredicted_4');
         figure
@@ -144,10 +108,10 @@ if ValidationMethode=="10Fold"
         CC_4.Title = "RampA";
 
     end
-    %classifier for class 5
     if ~isempty(lable_5)
         try
-
+            % classifierModel_5 = fitcdiscr(data_5, lable_5,'Leaveout','on', 'DiscrimType', dType);
+            %classifierModel_5 = fitcdiscr(data_5, lable_5,'KFold',10, 'DiscrimType', dType);
             if ClassificationMethod=="LDA"
                 classifierModel_5 = fitcdiscr(data_5, lable_5,'KFold',10, 'DiscrimType', dType);
             elseif ClassificationMethod=="SVM"
@@ -160,7 +124,7 @@ if ValidationMethode=="10Fold"
             errordlg(e.message);
             return;
         end
-        
+        PlotDataFeaturespace(data_5,lable_5);
         testLabelsPredicted_5 = kfoldPredict(classifierModel_5);
         [C,order] =confusionmat(lable_5,testLabelsPredicted_5');
         figure
@@ -169,10 +133,10 @@ if ValidationMethode=="10Fold"
         CC_5.ColumnSummary = 'column-normalized';
         CC_5.Title = "RampD";
     end
-
-    %classifier for class 6
     if ~isempty(lable_6)
         try
+            % classifierModel_6 = fitcdiscr(data_6, lable_6,'Leaveout','on', 'DiscrimType', dType);
+           %classifierModel_6 = fitcdiscr(data_6, lable_6,'KFold',10, 'DiscrimType', dType);
            if ClassificationMethod=="LDA"
                classifierModel_6 = fitcdiscr(data_6, lable_6,'KFold',10, 'DiscrimType', dType);
            elseif ClassificationMethod=="SVM"
@@ -184,7 +148,7 @@ if ValidationMethode=="10Fold"
             errordlg(e.message);
             return;
         end
-        
+        PlotDataFeaturespace(data_6,lable_6);
         testLabelsPredicted_6 = kfoldPredict(classifierModel_6);
         [C,order] =confusionmat(lable_6,testLabelsPredicted_6');
         figure
@@ -194,9 +158,10 @@ if ValidationMethode=="10Fold"
         CC_6.Title = "StairA";
 
     end
-    %classifier for class 7
     if ~isempty(lable_7)
         try
+            %  classifierModel_7 = fitcdiscr(data_7, lable_7,'Leaveout','on', 'DiscrimType', dType);
+            %classifierModel_7 = fitcdiscr(data_7, lable_7,'KFold',5, 'DiscrimType', dType);
             if ClassificationMethod=="LDA"
                 classifierModel_7 = fitcdiscr(data_7, lable_7,'KFold',10, 'DiscrimType', dType);
             elseif ClassificationMethod=="SVM"
@@ -208,7 +173,7 @@ if ValidationMethode=="10Fold"
             errordlg(e.message);
             return;
         end
-        
+        PlotDataFeaturespace(data_7,lable_7);
         testLabelsPredicted_7 = kfoldPredict(classifierModel_7);
         [C,order] = confusionmat(lable_7,testLabelsPredicted_7');
         figure
@@ -218,9 +183,10 @@ if ValidationMethode=="10Fold"
         CC_7.Title = "StairD";
 
     end
-    %classifier for class 8
     if ~isempty(lable_8) && length(lable_8)>5
         try
+            % classifierModel_8 = fitcdiscr(data_8, lable_8,'Leaveout','on', 'DiscrimType', dType);
+            %classifierModel_8 = fitcdiscr(data_8, lable_8,'KFold',10, 'DiscrimType', dType);
             if ClassificationMethod=="LDA"
                 classifierModel_8 = fitcdiscr(data_8, lable_8,'KFold',10, 'DiscrimType', dType);
             elseif ClassificationMethod=="SVM"
@@ -233,7 +199,7 @@ if ValidationMethode=="10Fold"
             errordlg(e.message);
             return;
         end
-        
+        PlotDataFeaturespace(data_8,lable_8);
         testLabelsPredicted_8 = kfoldPredict(classifierModel_8);
         [C,order] = confusionmat(lable_8,testLabelsPredicted_8');
         figure
@@ -243,9 +209,7 @@ if ValidationMethode=="10Fold"
 
     end
 
-    %% No Validation 
-    %one classifier for each locomotion mode, the only difference from
-    %10-fold mode is that here we do not have any validation
+    %% No Validation
 elseif ValidationMethode==""
 
     if ~isempty(lable_3)

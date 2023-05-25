@@ -1,33 +1,8 @@
-% ---------------------------- Copyright Notice ---------------------------
-% This file is part of LocoD © which is open and free software under
-% the GNU Lesser General Public License (LGPL). See the file "LICENSE" for
-% the full license governing this code and copyrights.
-%
-% LocoD was initially developed by Bahareh Ahkami at
-% Center for Bionics and Pain research and Chalmers University of Technology.
-% All authors’ contributions must be kept
-% acknowledged below in the section "Updates % Contributors".
-%
-% Would you like to contribute to science and sum efforts to improve
-% amputees’ quality of life? Join this project! or, send your comments to:
-% ahkami@chalmers.se.
-%
-% The entire copyright notice must be kept in this or any source file
-% linked to LocoD. This will ensure communication with all authors and
-% acknowledge contributions here and in the project web page (optional).
-
-% acknowledge contributions here and in the project web page (optional).
-% ------------------- Function Description ------------------
-% This is the third class of out of 4 main class of LocoD and every thing
+%%This is the third class of out of 4 main class of LocoD and every thing
 %%related to the recorded raw signal is here
-% Also there are some get functions to for example get number of samples or
-% number of tags
+%Also there are some get functions to forexample get number of samples or
+%number of tags
 %
-% --------------------------Updates--------------------------
-% 2022-03-15 / Bahareh Ahkami / Creation
-
-
-
 classdef Signal < handle
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
@@ -218,7 +193,11 @@ classdef Signal < handle
                 error('Cannot find LocoD root directory!')
             end
             [filename, path] = uigetfile([locoDDir '/SavedData/*'], dialogtitle,'MultiSelect','off');
-
+%             if filename == 0
+%                 fullpath = '';
+%                 filename = '';
+%                 return
+%             end
             fullpath = fullfile(path, filename);
         end
 

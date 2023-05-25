@@ -1,30 +1,3 @@
-% ---------------------------- Copyright Notice ---------------------------
-% This file is part of LocoD © which is open and free software under
-% the GNU Lesser General Public License (LGPL). See the file "LICENSE" for
-% the full license governing this code and copyrights.
-%
-% LocoD was initially developed by Bahareh Ahkami at
-% Center for Bionics and Pain research and Chalmers University of Technology.
-% All authors’ contributions must be kept
-% acknowledged below in the section "Updates % Contributors".
-%
-% Would you like to contribute to science and sum efforts to improve
-% amputees’ quality of life? Join this project! or, send your comments to:
-% ahkami@chalmers.se.
-%
-% The entire copyright notice must be kept in this or any source file
-% linked to LocoD. This will ensure communication with all authors and
-% acknowledge contributions here and in the project web page (optional).
-
-% acknowledge contributions here and in the project web page (optional).
-% ------------------- Function Description ------------------
-% Get features from one set of data for example extract features
-% From test data
-%
-% --------------------------Updates--------------------------
-% 2022-03-15 / Bahareh Ahkami / Creation
-
-
 %Get features from one set of data like test data
 function    [Features,Lables,Lables_TransitionORSteady,Prevtag]=GetFeaturesEachSet(data,recprops,FetureSet,SignalType)
 
@@ -47,16 +20,35 @@ Desireddata=data(ChIdx,:,:);
 %Get Features
 
 for i = 1 :numwindow
-    if i==97
-        a=3;
-    end
     f = GetSigFeatures(Desireddata(:,:,i),sF,FetureSet');
+%     if i == 1
+%         % To initialize the struct-array:
+%       Features(:,i) = f;
+%     end
     Features(:,i) = f; 
     Lables(:,i)=data(numAllCh+1,1,i);
     Lables_TransitionORSteady(:,i)=data(numAllCh+2,1,i);
     Prevtag(:,i)=data(numAllCh+4,1,i);
 end
-
+% allFeatureNames=fieldnames(f);
+% OutputFeatures=[];
+% Output=[];
+% %Filter features
+% for k=1:length(Features)  % number of windows
+%     for i=1:length(FetureSet)  % number of all the extracted features
+%         for j=1:length(allFeatureNames)
+%             if strcmp(allFeatureNames(j),FetureSet(i))==1
+%                 ExtractedFeatures = extractfield(Features(k),FetureSet(i));
+%                 Output=[Output,ExtractedFeatures];
+%             end
+%             
+%         end
+%          
+%     end
+%    
+%    OutputFeatures(k,:)=Output;
+%    Output=[];
+% end
 
       Features=squeeze(cell2mat(struct2cell(Features)))';      
 

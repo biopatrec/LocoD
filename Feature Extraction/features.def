@@ -15,9 +15,9 @@ tren	% Time: Rough Entropy
 tmax    % Time: Maximun
 tmin    % Time: Minimum
 tmn     %Avg
-fwl	    % Freq: wave length
-fmn	    % Freq: mean
-fmd	    % Freq: median
+fwl	% Freq: wave length
+fmn	% Freq: mean
+fmd	% Freq: median
 
 
 %tareg   % Time: Two autoregressive coeff
@@ -42,9 +42,14 @@ tzc
 tpks
 tmpks
 tmvel
+tslpch1
 tslpch2
 tpwr
+tcr
+tcv
+tdam    % Time: Difference absolute mean value
 tmfl    % Time: Maximum fractal length            
+tfdh    % Time: Fractal dimension Higuchi
 tfd     % Time: Fractal dimension           
 tcard   % Time: Cardinality
 tren	% Time: Rough Entropy
@@ -52,7 +57,7 @@ tren	% Time: Rough Entropy
 
 Frequency:
 
-fwl	    % Freq: wave length
+fwl	% Freq: wave length
 fmn	% Freq: mean
 fmd	% Freq: median
 fpmn	% Freq: peak mean
