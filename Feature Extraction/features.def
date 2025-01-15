@@ -23,7 +23,6 @@ fmd	% Freq: median
 %tareg   % Time: Two autoregressive coeff
 
 
-
 NOTE: Not all features are used constantly so
 some of them are left out to improve speed
 

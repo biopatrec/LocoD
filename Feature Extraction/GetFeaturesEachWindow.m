@@ -12,16 +12,20 @@ elseif SignalType=="PS"
 end
 
 Desireddata=data(ChIdx,:,:);
-
-
-
-%Get Features
-
 f = GetSigFeatures(Desireddata(:,:),sF);
+
+Output=[];
+OutputFeatures=[];
+%Get Features
+% for i=1:length(FetureSet)  % number of windows
+%     ExtractedFeatures =  GetSigFeatures(Desireddata(:,:),sF,FetureSet(i));
+% 
+%     Output=[Output,ExtractedFeatures];
+% end
 Features = f;
 allFeatureNames=fieldnames(f);
-OutputFeatures=[];
-Output=[];
+
+
 %Filter features
 for k=1:length(Features)  % number of windows
     for i=1:length(FetureSet)  % number of all the extracted features
@@ -30,15 +34,15 @@ for k=1:length(Features)  % number of windows
                 ExtractedFeatures = extractfield(Features(k),FetureSet(i));
                 Output=[Output,ExtractedFeatures];
             end
-            
+
         end
-         
+
     end
-   
+
    OutputFeatures(k,:)=Output;
    Output=[];
 end
 
 % for eventIndex = 1 : this.numTransition
 
-end
+%end

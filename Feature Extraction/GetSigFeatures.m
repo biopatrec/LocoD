@@ -60,6 +60,10 @@ function pF = GetSigFeatures_tmin(pF)
     pF.f.tmin = min(pF.data,[],2);
 end
 
+function pF = GetSigFeatures_YOURFEAT(pF)
+   %YOUR CODE
+end
+
 
 % -----------------------------------------------
 function pF = GetSigFeatures_tmn(pF)
